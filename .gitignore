@@ -1,0 +1,9 @@
+/target/
+/.classpath
+/.project
+/.settings
+/.idea
+/lib
+/pom.xml.asc
+/dependency.txt
+/*.iml
