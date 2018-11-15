@@ -96,7 +96,7 @@ public class AutoProxyFactory extends ProxyFactory {
 
 		@Override
 		public boolean matches(Method method) {
-			if (method.isBridge()) {
+			if (method.isSynthetic() || method.isBridge()) {
 				return false;
 			} else {
 				return true;
