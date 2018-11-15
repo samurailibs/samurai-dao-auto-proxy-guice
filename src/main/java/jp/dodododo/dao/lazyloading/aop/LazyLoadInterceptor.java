@@ -21,6 +21,7 @@ public class LazyLoadInterceptor<T> implements MethodInterceptor {
 		this.targetClass = targetClass;
 	}
 
+	@Override
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		@SuppressWarnings("unchecked")
 		AutoLazyLoadingProxy<T> proxy = (AutoLazyLoadingProxy<T>) invocation

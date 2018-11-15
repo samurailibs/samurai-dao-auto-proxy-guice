@@ -106,6 +106,7 @@ public class ProxyPropertyTest {
 			this.DEPTNO = DEPTNO;
 		}
 
+		@Override
 		public Dept lazyLoad() {
 			System.out.println("load");
 			Optional<Dept> dept = DeptProxy.dao.selectOne("select * from dept where deptno =" + DEPTNO, Dept.class);
@@ -116,11 +117,13 @@ public class ProxyPropertyTest {
 			}
 		}
 
+		@Override
 		public Dept real() {
 			System.out.println("real");
 			return real;
 		}
 
+		@Override
 		public void setReal(Dept real) {
 			System.out.println("setreal");
 			this.real = real;

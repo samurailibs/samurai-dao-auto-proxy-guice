@@ -13,7 +13,9 @@ import jp.dodododo.dao.annotation.Bean;
 import jp.dodododo.dao.annotation.Column;
 import jp.dodododo.dao.annotation.Id;
 import jp.dodododo.dao.annotation.IdDefSet;
+import jp.dodododo.dao.annotation.LazyLoading;
 import jp.dodododo.dao.annotation.Property;
+import jp.dodododo.dao.annotation.Proxy;
 import jp.dodododo.dao.id.Sequence;
 import jp.dodododo.dao.impl.Dept;
 import jp.dodododo.dao.impl.RdbDao;
@@ -37,7 +39,7 @@ public class ProxyTest {
 	public void testInsertAndSelect() {
 		dao = new RdbDao(getDataSource());
 		SqlLogRegistry logRegistry = dao.getSqlLogRegistry();
-		DeptProxy.dao = dao;
+		DeptProxy.dataSource = getDataSource();
 
 		Emp emp = new Emp();
 		emp.dept = new Dept();
@@ -98,7 +100,7 @@ public class ProxyTest {
 	}
 
 	public static class DeptProxy extends Dept implements AutoLazyLoadingProxy<Dept> {
-		private static RdbDao dao;
+		private static DataSource dataSource;
 
 		@Column("deptNO")
 		public String DEPTNO;
@@ -112,21 +114,38 @@ public class ProxyTest {
 			this.DEPTNO = DEPTNO;
 		}
 
+		@Override
 		public Dept lazyLoad() {
-			Optional<Dept> dept = DeptProxy.dao.selectOne("select * from dept where deptno =" + DEPTNO, Dept.class);
-			if(dept.isPresent()) {
-				return dept.get();
-			} else {
-				return null;
+			try {
+				RdbDao dao = new RdbDao(getDBConnection());
+				Optional<Dept> dept = dao.selectOne("select * from dept where deptno =" + DEPTNO, Dept.class);
+				if (dept.isPresent()) {
+					return dept.get();
+				} else {
+					return null;
+				}
+			} catch (SQLException e) {
+				throw new RuntimeException(e);
 			}
 		}
 
+		@Override
 		public Dept real() {
 			return real;
 		}
 
+		@Override
 		public void setReal(Dept real) {
 			this.real = real;
+		}
+
+		protected static Connection getConnection() throws SQLException {
+			return dataSource.getConnection();
+		}
+
+		@LazyLoading(enable = false)
+		protected Connection getDBConnection() throws SQLException {
+			return getConnection();
 		}
 	}
 
@@ -134,7 +153,7 @@ public class ProxyTest {
 		return dbTestRule.getDataSource();
 	}
 
-	private Connection getConnection() throws SQLException {
+	protected final Connection getConnection() throws SQLException {
 		return dbTestRule.getConnection();
 	}
 }
