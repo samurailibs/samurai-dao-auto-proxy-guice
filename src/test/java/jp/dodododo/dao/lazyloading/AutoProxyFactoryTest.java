@@ -65,6 +65,13 @@ public class AutoProxyFactoryTest {
 		assertNull(target.real());
 	}
 
+	@Test
+	public void testCreateAbstractClass() throws Exception {
+		AbstractClass target = new AutoProxyFactory().create(AbstractClass.class);
+
+		assertNotNull(target);
+	}
+
 	public static class TestTarget implements AutoLazyLoadingProxy<TestTarget> {
 
 		private TestTarget real;
@@ -112,6 +119,9 @@ public class AutoProxyFactoryTest {
 		public void noLazyLoading() {
 			System.out.println("noLazyLoading");
 		}
+	}
+
+	public static abstract class AbstractClass {
 	}
 
 }

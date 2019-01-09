@@ -6,6 +6,10 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Map;
 
+import javassist.CannotCompileException;
+import javassist.ClassPool;
+import javassist.CtClass;
+import javassist.CtNewConstructor;
 import jp.dodododo.dao.lazyloading.aop.LazyLoadInterceptor;
 import jp.dodododo.dao.message.Message;
 import jp.dodododo.dao.util.CacheUtil;
@@ -20,14 +24,38 @@ import com.google.inject.matcher.Matchers;
 public class AutoProxyFactory extends ProxyFactory {
 
 	private final static Map<Class<?>, Injector> GUICES = CacheUtil.cacheMap();
+	private final static Map<Class<?>, Class<?>> TARGET_CLASSES = CacheUtil.cacheMap();
 
 	@Override
 	public <T> T create(Class<T> clazz) {
 
 		validate(clazz);
 
-		Injector injector = getGuice(clazz);
-		return injector.getInstance(clazz);
+		Class<T> targetClass = getTargetClass(clazz);
+		Injector injector = getGuice(targetClass);
+		return injector.getInstance(targetClass);
+	}
+
+	protected <T> Class<T> getTargetClass(Class<T> clazz) {
+		Class<?> targetClass = TARGET_CLASSES.get(clazz);
+		if (targetClass != null) {
+			return (Class<T>) targetClass;
+		}
+		if (Modifier.isAbstract(clazz.getModifiers())) {
+			ClassPool classPool = ClassPool.getDefault();
+			CtClass cc = classPool.makeClass(clazz.getName() + "$$CreateBySamuraiDao");
+			try {
+				cc.setSuperclass(classPool.makeClass(clazz.getName()));
+				cc.addConstructor(CtNewConstructor.defaultConstructor(cc));
+				targetClass = (Class<T>) cc.toClass();
+			} catch (CannotCompileException e) {
+				throw new RuntimeException(e);
+			}
+		} else {
+			targetClass = clazz;
+		}
+		TARGET_CLASSES.put(clazz, targetClass);
+		return (Class<T>) targetClass;
 	}
 
 	private static synchronized <T> Injector getGuice(Class<T> clazz) {
