@@ -15,7 +15,11 @@
 -->
   <description>proxy function for samurai-dao.</description>
   <url>https://github.com/samurailibs/samurai-dao-auto-proxy-guice/</url>
-  <inceptionYear>2008-2018</inceptionYear>
+  <inceptionYear>2008-2019</inceptionYear>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
 
   <licenses>
     <license>
@@ -140,6 +144,9 @@
             <source>1.8</source>
             <target>1.8</target>
             <encoding>UTF-8</encoding>
+            <compilerArgs>
+              <arg>-Xlint:unchecked</arg>
+            </compilerArgs>
           </configuration>
         </plugin>
         <plugin>
@@ -153,6 +160,7 @@
     <plugins>
       <plugin>
         <artifactId>maven-source-plugin</artifactId>
+        <version>3.0.1</version>
         <executions>
           <execution>
             <id>source-jar</id>
@@ -165,6 +173,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-javadoc-plugin</artifactId>
+        <version>3.0.1</version>
         <configuration>
           <use>false</use>
           <quiet>true</quiet>
